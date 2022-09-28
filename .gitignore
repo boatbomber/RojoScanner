@@ -1,0 +1,24 @@
+# Rust output directory
+/target
+
+# Headers for clibrojo
+/include
+
+# Roblox model and place files in the root, used for debugging
+/*.rbxm
+/*.rbxmx
+/*.rbxl
+/*.rbxlx
+
+# Test places for the Roblox Studio Plugin
+/plugin/*.rbxlx
+
+# Packages for the Roblox Studio Plugin
+plugin/*Packages
+
+# Roblox Studio holds 'lock' files on places
+*.rbxl.lock
+*.rbxlx.lock
+
+# Snapshot files from the 'insta' Rust crate
+**/*.snap.new

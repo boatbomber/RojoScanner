@@ -1,0 +1,16 @@
+{
+	"name": "RojoScanner",
+	"tree": {
+		"$className": "Folder",
+		"Plugin": {
+			"$path": "src"
+		},
+		"Packages": {
+			"$path": "Packages",
+
+			"Http": {
+				"$path": "http"
+			}
+		}
+	}
+}
