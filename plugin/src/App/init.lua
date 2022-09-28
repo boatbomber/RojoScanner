@@ -26,6 +26,15 @@ while not RojoAPI do
 	RojoAPI = _G.Rojo
 end
 
+RojoAPI:RequestAccess({
+	-- Properties
+	"Connected", "Address", "ProjectName",
+	-- Events
+	"Changed",
+	-- Methods
+	"ConnectAsync", "DisconnectAsync", "GetHostAndPort", "CreateApiContext", "Notify",
+})
+
 local AppStatus = strict("AppStatus", {
 	NotConnected = "NotConnected",
 	Settings = "Settings",
