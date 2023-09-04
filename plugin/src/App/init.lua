@@ -20,13 +20,11 @@ local StudioPluginGui = require(script.Components.Studio.StudioPluginGui)
 local StudioPluginContext = require(script.Components.Studio.StudioPluginContext)
 local StatusPages = require(script.StatusPages)
 
-local RojoAPI = _G.Rojo
-while not RojoAPI do
-	task.wait(1/5)
-	RojoAPI = _G.Rojo
-end
+local plugin = plugin or script:FindFirstAncestorWhichIsA("Plugin")
 
-RojoAPI:RequestAccess({
+local Rojo = require(game:WaitForChild("Rojo", math.huge))
+
+Rojo.API:RequestAccess(plugin, {
 	-- Properties
 	"Connected", "Address", "ProjectName",
 	-- Events
@@ -60,10 +58,10 @@ function App:init()
 	end
 
 	self:setState({
-		appStatus = RojoAPI.Connected and AppStatus.Connected or AppStatus.NotConnected,
+		appStatus = Rojo.API.Connected and AppStatus.Connected or AppStatus.NotConnected,
 		connection = {
-			address = RojoAPI.Address,
-			project = RojoAPI.ProjectName,
+			address = Rojo.API.Address,
+			project = Rojo.API.ProjectName,
 		},
 
 		guiEnabled = false,
@@ -72,7 +70,7 @@ function App:init()
 		addressSlots = addressSlots,
 	})
 
-	RojoAPI.Changed:Connect(function(prop, value)
+	Rojo.API.Changed:Connect(function(prop, value)
 		if prop == "Connected" then
 			self:setState({
 				appStatus = value and AppStatus.Connected or AppStatus.NotConnected,
@@ -81,13 +79,13 @@ function App:init()
 			self:setState({
 				connection = {
 					address = value,
-					project = RojoAPI.ProjectName,
+					project = Rojo.API.ProjectName,
 				},
 			})
 		elseif prop == "ProjectName" then
 			self:setState({
 				connection = {
-					address = RojoAPI.Address,
+					address = Rojo.API.Address,
 					project = value,
 				},
 			})
@@ -96,7 +94,7 @@ function App:init()
 
 	self.scanThread = task.spawn(function()
 		while true do
-			if self.state.guiEnabled and not RojoAPI.Connected then
+			if self.state.guiEnabled and not Rojo.API.Connected then
 				self:scanSlots()
 			end
 			task.wait(10)
@@ -153,20 +151,20 @@ function App:editSlot(stamp, newData)
 end
 
 function App:startSession(host: string?, port: string?)
-	RojoAPI:ConnectAsync(host, port)
+	Rojo.API:ConnectAsync(host, port)
 end
 
 function App:endSession()
-	RojoAPI:DisconnectAsync()
+	Rojo.API:DisconnectAsync()
 end
 
 function App:findServedProject(host: string?, port: string?)
 	if host == nil or port == nil then
-		host, port = RojoAPI:GetHostAndPort()
+		host, port = Rojo.API:GetHostAndPort()
 	end
 
 	local baseUrl = string.format("http://%s:%s", host :: string, port :: string)
-	local apiContext = RojoAPI:CreateApiContext(baseUrl)
+	local apiContext = Rojo.API:CreateApiContext(baseUrl)
 
 	local _, found, value = apiContext:connect()
 		:andThen(function(serverInfo)
@@ -198,7 +196,7 @@ function App:scanSlots()
 			completed += 1
 
 			if found and Settings:get("notifyFinds") and self.state.addressSlots[stamp] and self.state.addressSlots[stamp].found == false then
-				RojoAPI:Notify(string.format("Found project '%s' at %s:%s", value, data.host, data.port), 10)
+				Rojo.API:Notify(string.format("Found project '%s' at %s:%s", value, data.host, data.port), 10)
 			end
 
 			self:editSlot(stamp, {
@@ -273,7 +271,7 @@ function App:render()
 					end,
 
 					onAddSlot = function()
-						local host, port = RojoAPI:GetHostAndPort()
+						local host, port = Rojo.API:GetHostAndPort()
 						self:addSlot(host .. ":" .. port)
 					end,
 
